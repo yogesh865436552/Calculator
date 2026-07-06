@@ -1,8 +1,7 @@
 import tkinter as tk
 from tkinter import messagebox
 import json
-import os  
-
+import os
 
 
 class Calculator:
@@ -39,7 +38,6 @@ class Calculator:
         )
         self.history_list.pack(fill=tk.BOTH, expand=True, padx=5, pady=5)
 
-        # clear history button
         tk.Button(
             self.history_frame,
             text="Clear",
@@ -50,6 +48,7 @@ class Calculator:
             borderwidth=0
         ).pack(fill=tk.X, padx=5, pady=5)
 
+        # big display at top - right aligned looks like a real calculator
         self.display = tk.Entry(
             self.calc_frame,
             font=("Arial", 36, "bold"),
@@ -65,9 +64,11 @@ class Calculator:
 
         self.create_buttons()
 
-        #keyboard support - much faster than clicking buttons
-        self.root.bind("<Key>", self.key_press)
-     
+        # keyboard support - much faster than clicking buttons
+        self.root.bind('<Key>', self.key_press)
+
+        # load previous history on startup
+        self.load_history()
 
     def create_buttons(self):
         # grey for numbers, gold for operators
@@ -118,17 +119,16 @@ class Calculator:
             self.calc_frame.columnconfigure(i, weight=1)
 
     def key_press(self, event):
-    # handle all keyboard input in one place
+        # handle all keyboard input in one place
         allowed = '0123456789+-*/.%'
         if event.char in allowed:
-           self.on_click(event.char)
+            self.on_click(event.char)
         elif event.keysym == "Return":
             self.on_click("=")
         elif event.keysym == "BackSpace":
             self.on_click("DEL")
         elif event.keysym == "Escape":
             self.on_click("C")
-                
 
     def on_click(self, char):
         if char == "C":
@@ -143,6 +143,7 @@ class Calculator:
                 result = str(eval(self.equation))
                 # save to history before replacing equation
                 self.history_list.insert(0, f"{self.equation} = {result}")
+                self.save_history()
                 self.equation = result
                 self.display.delete(0, tk.END)
                 self.display.insert(tk.END, result)
@@ -155,8 +156,25 @@ class Calculator:
             self.display.delete(0, tk.END)
             self.display.insert(tk.END, self.equation)
 
+    def save_history(self):
+        # save history so it persists after closing
+        history = list(self.history_list.get(0, tk.END))
+        with open("calc_history.json", "w") as f:
+            json.dump(history, f)
+
+    def load_history(self):
+        # load previous history on startup
+        if os.path.exists("calc_history.json"):
+            with open("calc_history.json", "r") as f:
+                history = json.load(f)
+            for item in history:
+                self.history_list.insert(tk.END, item)
+
     def clear_history(self):
         self.history_list.delete(0, tk.END)
+        # clear saved history file too
+        self.save_history()
+
 
 if __name__ == "__main__":
     root = tk.Tk()
