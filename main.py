@@ -61,6 +61,13 @@ class Calculator:
 
         self.create_buttons()
 
+        #keyboard support - much faster than clicking buttons
+        self.root.bind("<Key>", self.key_press)
+        self.root.bind("<Return>", lambda e: self.on_click("="))
+        self.root.bind("<BackSpace>", lambda e: self.on_click("DEL"))
+        self.root.bind("<Escape>", lambda e: self.on_click("C"))    
+
+
     def create_buttons(self):
         # grey for numbers, gold for operators
         num_bg = "#EEEEEE"
@@ -108,6 +115,13 @@ class Calculator:
             self.calc_frame.rowconfigure(i, weight=1)
         for i in range(4):
             self.calc_frame.columnconfigure(i, weight=1)
+
+    def key_press(self, event):
+        #let user type numbers and operators directly
+        allowed = "0123456789+-*/.%"
+        if event.char in allowed:
+            self.on_click(event.char) 
+                
 
     def on_click(self, char):
         if char == "C":
