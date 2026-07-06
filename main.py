@@ -1,6 +1,8 @@
 import tkinter as tk
 from tkinter import messagebox
 
+from zope import event
+
 class Calculator:
     def __init__(self, root):
         self.root = root
@@ -63,10 +65,7 @@ class Calculator:
 
         #keyboard support - much faster than clicking buttons
         self.root.bind("<Key>", self.key_press)
-        self.root.bind("<Return>", lambda e: self.on_click("="))
-        self.root.bind("<BackSpace>", lambda e: self.on_click("DEL"))
-        self.root.bind("<Escape>", lambda e: self.on_click("C"))    
-
+     
 
     def create_buttons(self):
         # grey for numbers, gold for operators
@@ -117,10 +116,16 @@ class Calculator:
             self.calc_frame.columnconfigure(i, weight=1)
 
     def key_press(self, event):
-        #let user type numbers and operators directly
-        allowed = "0123456789+-*/.%"
+    # handle all keyboard input in one place
+        allowed = '0123456789+-*/.%'
         if event.char in allowed:
-            self.on_click(event.char) 
+           self.on_click(event.char)
+        elif event.keysym == "Return":
+            self.on_click("=")
+        elif event.keysym == "BackSpace":
+            self.on_click("DEL")
+        elif event.keysym == "Escape":
+            self.on_click("C")
                 
 
     def on_click(self, char):
